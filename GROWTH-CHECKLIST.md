@@ -85,9 +85,12 @@ already linked on the site, and link back to procleansurfaces.com in each bio.
 
 ---
 
-## Quote-form email (FormSubmit) — ONE click left
+## Quote-form email — zero setup (done)
 
-The quote forms send to procleansurfaceworks@gmail.com via FormSubmit (no account needed).
-An **activation email from FormSubmit is already sitting in that Gmail inbox** — open it and
-click **"Activate Form"** once. After that, every quote request is emailed automatically.
-Until then, phone/text still works with zero setup, so no lead is lost.
+The quote forms open a pre-filled email to procleansurfaceworks@gmail.com (direct-send,
+no account, no activation, nothing to click). The most reliable lead channel is still the
+**call/text (225) 302-9540** button, which is the primary CTA on every page and needs nothing.
+
+OPTIONAL upgrade (nicer UX — form submits without opening a mail app): switch the two forms
+to FormSubmit. It's free but requires ONE click on an activation email that lands in the
+Gmail inbox (spam protection — only the inbox owner can do it). Say the word and I'll flip it.
