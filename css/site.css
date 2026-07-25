@@ -233,6 +233,24 @@ main p a{text-decoration:underline;text-underline-offset:3px}
 .related a{display:inline-block;margin:0 20px 10px 0;font-size:16px;font-weight:700;color:var(--blue)}
 .related a:hover{color:var(--blue-deep)}
 
+/* before / after slider */
+.ba-slider{--pos:50%;position:relative;width:100%;max-width:470px;margin:0 auto;aspect-ratio:860/1174;overflow:hidden;border-radius:18px;border:1px solid var(--line);box-shadow:0 16px 44px rgba(16,40,60,0.18);cursor:ew-resize;user-select:none;touch-action:none;background:#e7eef4}
+.ba-slider img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.ba-slider .ba-before-img{clip-path:inset(0 calc(100% - var(--pos)) 0 0)}
+.ba-slider .ba-tag{position:absolute;top:14px;z-index:3;font-size:11.5px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;padding:6px 11px;border-radius:8px;pointer-events:none;color:#fff}
+.ba-slider .ba-tag.before{left:14px;background:rgba(14,30,42,0.82)}
+.ba-slider .ba-tag.after{right:14px;background:linear-gradient(135deg,#2A9BEA,#0E74C4)}
+.ba-slider .ba-divider{position:absolute;top:0;bottom:0;left:var(--pos);width:3px;margin-left:-1.5px;background:#fff;z-index:4;box-shadow:0 0 0 1px rgba(16,40,60,0.18)}
+.ba-slider .ba-handle{position:absolute;top:50%;left:var(--pos);transform:translate(-50%,-50%);z-index:5;width:46px;height:46px;border-radius:50%;background:#fff;box-shadow:0 6px 18px rgba(16,40,60,0.4);display:flex;align-items:center;justify-content:center;color:var(--blue-ink);cursor:ew-resize;touch-action:none}
+.ba-slider .ba-handle svg{width:22px;height:22px}
+.ba-slider .ba-handle:focus-visible{outline:3px solid var(--blue-bright);outline-offset:3px}
+.ba-slider-cap{padding:16px 6px 0;font-size:14.5px;color:var(--ink-muted);text-align:center}
+.ba-slider-cap strong{color:var(--ink)}
+
+/* reveal on scroll (only active once JS confirms support) */
+.reveal-on .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+.reveal-on .reveal.in{opacity:1;transform:none}
+
 @media (max-width:980px){
   .contact-grid{grid-template-columns:1fr;gap:34px}
   .grid-4{grid-template-columns:1fr 1fr}

@@ -81,7 +81,7 @@
 
 <section class="section">
   <div class="container">
-    <div class="head-center" style="max-width:700px">
+    <div class="head-center reveal" style="max-width:700px">
       <div class="eyebrow" style="color:var(--blue-bright)">What's Included</div>
       <h2 class="h2">Everything we handle on a sidewalk &amp; walkway cleaning job.</h2>
     </div>
@@ -98,7 +98,7 @@
 
 <section class="section section-cream on-light">
   <div class="container">
-    <div class="head-center" style="max-width:700px">
+    <div class="head-center reveal" style="max-width:700px">
       <div class="eyebrow" style="color:var(--blue-ink)">How It Works</div>
       <h2 class="h2">Simple from quote to clean.</h2>
     </div>
@@ -112,13 +112,31 @@
 
 <section class="section">
   <div class="container">
-    <div class="head-center" style="max-width:700px">
+    <div class="head-center reveal" style="max-width:700px">
       <div class="eyebrow" style="color:var(--blue-bright)">The Difference</div>
       <h2 class="h2">One pass, and it looks brand new.</h2>
     </div>
     <div class="grid grid-2">
-      <div class="ba-card"><figure><img src="/images/ba-sidewalk.webp" srcset="/images/ba-sidewalk-800.webp 800w, /images/ba-sidewalk.webp 1400w" sizes="(max-width:760px) 90vw, 560px" alt="Before and after pressure washing a concrete sidewalk in Baton Rouge" width="1400" height="933" loading="lazy" decoding="async"></figure><div class="ba-cap"><strong>Sidewalk &amp; walkway</strong> — mildew and staining washed off in one visit.</div></div>
-      <div class="ba-card ba-after"><figure><img src="/images/ba-door.webp" srcset="/images/ba-door-800.webp 800w, /images/ba-door.webp 1400w" sizes="(max-width:760px) 90vw, 560px" alt="Before and after pressure washing a front entryway in Baton Rouge" width="1400" height="933" loading="lazy" decoding="async"></figure><div class="ba-cap"><strong>Front entryway</strong> — dingy porch concrete brought back to its original color.</div></div>
+      <div>
+        <div class="ba-slider" aria-label="Before and after: sidewalk cleaning in Baton Rouge">
+          <img class="ba-after-img" src="/images/sw-after.webp" width="860" height="1174" alt="Sidewalk after pressure washing in Baton Rouge" loading="lazy" decoding="async">
+          <img class="ba-before-img" src="/images/sw-before.webp" width="860" height="1174" alt="Sidewalk before pressure washing, stained with mildew" loading="lazy" decoding="async">
+          <span class="ba-tag before">Before</span><span class="ba-tag after">After</span>
+          <div class="ba-divider"></div>
+          <div class="ba-handle" role="slider" tabindex="0" aria-label="Reveal before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6-6 6 6 6"/><path d="m15 6 6 6-6 6"/></svg></div>
+        </div>
+        <div class="ba-slider-cap"><strong>Sidewalk &amp; walkway</strong> — drag to watch the mildew disappear.</div>
+      </div>
+      <div>
+        <div class="ba-slider" aria-label="Before and after: front entryway cleaning in Baton Rouge">
+          <img class="ba-after-img" src="/images/dr-after.webp" width="860" height="1174" alt="Front entryway after pressure washing in Baton Rouge" loading="lazy" decoding="async">
+          <img class="ba-before-img" src="/images/dr-before.webp" width="860" height="1174" alt="Front entryway before pressure washing, dingy concrete" loading="lazy" decoding="async">
+          <span class="ba-tag before">Before</span><span class="ba-tag after">After</span>
+          <div class="ba-divider"></div>
+          <div class="ba-handle" role="slider" tabindex="0" aria-label="Reveal before and after" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6-6 6 6 6"/><path d="m15 6 6 6-6 6"/></svg></div>
+        </div>
+        <div class="ba-slider-cap"><strong>Front entryway</strong> — porch concrete back to its original color.</div>
+      </div>
     </div>
     <div style="text-align:center;margin-top:40px"><a href="tel:+12253029540" class="btn btn-primary">Get My Free Quote &rarr;</a></div>
   </div>
@@ -126,7 +144,7 @@
 
 <section class="section section-cream on-light">
   <div class="container">
-    <div class="head-center" style="max-width:700px">
+    <div class="head-center reveal" style="max-width:700px">
       <div class="eyebrow" style="color:var(--blue-ink)">Questions</div>
       <h2 class="h2">Straight answers.</h2>
     </div>
@@ -211,13 +229,6 @@
   Call or Text (225) 302-9540
 </a>
 
-<script>
-  var nav=document.getElementById('nav');var s=null;
-  function onScroll(){var y=window.scrollY>40;if(y!==s){s=y;nav.classList.toggle('scrolled',y);}}
-  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
-  var toggle=document.getElementById('navToggle'),links=document.getElementById('navLinks');
-  toggle.addEventListener('click',function(){var o=links.classList.toggle('open');toggle.classList.toggle('open',o);toggle.setAttribute('aria-expanded',o?'true':'false');});
-  links.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){links.classList.remove('open');toggle.classList.remove('open');toggle.setAttribute('aria-expanded','false');});});
-</script>
+<script defer src="/js/site.js"></script>
 </body>
 </html>

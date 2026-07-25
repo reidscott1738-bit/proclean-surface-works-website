@@ -85,7 +85,7 @@
 
 <section class="section">
   <div class="container">
-    <div class="head-center" style="max-width:700px">
+    <div class="head-center reveal" style="max-width:700px">
       <div class="eyebrow" style="color:var(--blue-bright)">What We Clean in Saint Gabriel</div>
       <h2 class="h2">Every exterior surface, done right.</h2>
     </div>
@@ -102,7 +102,7 @@
 
 <section class="section section-cream on-light">
   <div class="container">
-    <div class="head-center" style="max-width:700px">
+    <div class="head-center reveal" style="max-width:700px">
       <div class="eyebrow" style="color:var(--blue-ink)">What Neighbors Say</div>
       <h2 class="h2">Trusted by local homeowners.</h2>
     </div>
@@ -115,7 +115,7 @@
 
 <section class="section section-cream on-light">
   <div class="container">
-    <div class="head-center" style="max-width:700px">
+    <div class="head-center reveal" style="max-width:700px">
       <div class="eyebrow" style="color:var(--blue-ink)">Questions</div>
       <h2 class="h2">Straight answers.</h2>
     </div>
@@ -209,13 +209,6 @@
   Call or Text (225) 302-9540
 </a>
 
-<script>
-  var nav=document.getElementById('nav');var s=null;
-  function onScroll(){var y=window.scrollY>40;if(y!==s){s=y;nav.classList.toggle('scrolled',y);}}
-  window.addEventListener('scroll',onScroll,{passive:true});onScroll();
-  var toggle=document.getElementById('navToggle'),links=document.getElementById('navLinks');
-  toggle.addEventListener('click',function(){var o=links.classList.toggle('open');toggle.classList.toggle('open',o);toggle.setAttribute('aria-expanded',o?'true':'false');});
-  links.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){links.classList.remove('open');toggle.classList.remove('open');toggle.setAttribute('aria-expanded','false');});});
-</script>
+<script defer src="/js/site.js"></script>
 </body>
 </html>
