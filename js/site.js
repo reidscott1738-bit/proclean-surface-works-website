@@ -92,17 +92,19 @@
       });
       Cal.ns["free-quote-inspection"]("ui", { "theme": "light", "hideEventTypeDetails": false, "layout": "month_view" });
     };
-    // Lazy: load on approach, first interaction, or timeout — whichever comes first.
+    // Load on approach or first interaction (instant), and warm up during idle so it's
+    // usually ready before the user even reaches it.
     if ('IntersectionObserver' in window) {
       var cio = new IntersectionObserver(function (entries) {
         entries.forEach(function (e) { if (e.isIntersecting) { loadCal(); cio.disconnect(); } });
-      }, { rootMargin: '1000px' });
+      }, { rootMargin: '1400px' });
       cio.observe(calEl);
     }
     var kick = function () { loadCal(); };
     ['scroll', 'pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
       window.addEventListener(ev, kick, { passive: true, once: true });
     });
-    setTimeout(loadCal, 4000);
+    var idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1200); };
+    idle(function () { loadCal(); }, { timeout: 2500 });
   }
 })();
