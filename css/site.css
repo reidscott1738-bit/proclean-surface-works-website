@@ -247,6 +247,14 @@ main p a{text-decoration:underline;text-underline-offset:3px}
 .ba-slider-cap{padding:16px 6px 0;font-size:14.5px;color:var(--ink-muted);text-align:center}
 .ba-slider-cap strong{color:var(--ink)}
 
+/* Cal.com booking embed */
+.cal-embed{height:660px;overflow:hidden;border-radius:10px;margin-top:4px;background:#fff}
+.cal-embed>div{width:100%;height:100%;overflow:auto}
+.cal-loading{display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-muted);font-size:14px;gap:10px}
+.cal-loading .spin{width:20px;height:20px;border:2.5px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:calspin .8s linear infinite}
+@keyframes calspin{to{transform:rotate(360deg)}}
+@media (max-width:560px){ .cal-embed{height:560px} }
+
 /* reveal on scroll (only active once JS confirms support) */
 .reveal-on .reveal{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
 .reveal-on .reveal.in{opacity:1;transform:none}
