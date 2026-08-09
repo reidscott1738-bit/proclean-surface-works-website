@@ -41,11 +41,11 @@ Location pages (dirs):
 
 - **Design/colors/layout:** edit `css/site.css` — it's the single source of truth for every page.
 - **Business facts** (phone, email, service list, areas) appear in each page's JSON-LD schema and footer. Keep them identical everywhere (NAP consistency matters for local ranking).
-- Every page's phone is `(225) 302-9540` → `tel:+12253029540` / `sms:+12253029540`.
+- Every page's phone is `(225) 363-5220` → `tel:+12253635220` / `sms:+12253635220`.
 
 ## Contact / NAP
 
 - Pro Clean Surface Works
-- (225) 302-9540 · procleansurfaceworks@gmail.com
+- (225) 363-5220 · procleansurfaceworks@gmail.com
 - Baton Rouge, Louisiana
 - Serving East Baton Rouge, Ascension, Livingston & Iberville parishes.

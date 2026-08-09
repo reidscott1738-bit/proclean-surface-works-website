@@ -36,7 +36,7 @@ You have 2. Aim for 10+ fast. Text every happy customer your review link.
 
 ```
 Business name: Pro Clean Surface Works
-Phone:         (225) 302-9540
+Phone:         (225) 363-5220
 Email:         procleansurfaceworks@gmail.com
 Website:       https://procleansurfaces.com
 City:          Baton Rouge, Louisiana
@@ -89,7 +89,7 @@ already linked on the site, and link back to procleansurfaces.com in each bio.
 
 The quote forms open a pre-filled email to procleansurfaceworks@gmail.com (direct-send,
 no account, no activation, nothing to click). The most reliable lead channel is still the
-**call/text (225) 302-9540** button, which is the primary CTA on every page and needs nothing.
+**call/text (225) 363-5220** button, which is the primary CTA on every page and needs nothing.
 
 OPTIONAL upgrade (nicer UX — form submits without opening a mail app): switch the two forms
 to FormSubmit. It's free but requires ONE click on an activation email that lands in the
