@@ -76,21 +76,29 @@
   }
 
   // ---- Cal.com booking widget (lazy — only loads when scrolled near) ----
-  var calEl = document.getElementById('my-cal-inline-free-quote-inspection');
+  var calEl = document.getElementById('my-cal-inline-pro-clean');
   if (calEl) {
     var calLoaded = false;
     var loadCal = function () {
       if (calLoaded) return; calLoaded = true;
       (function (C, A, L) { var p = function (a, ar) { a.q.push(ar); }; var d = C.document; C.Cal = C.Cal || function () { var cal = C.Cal; var ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { var api = function () { p(api, arguments); }; var namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
-      Cal("init", "free-quote-inspection", { origin: "https://app.cal.com" });
+      Cal("init", "pro-clean", { origin: "https://app.cal.com" });
       Cal.config = Cal.config || {};
       Cal.config.forwardQueryParams = true;
-      Cal.ns["free-quote-inspection"]("inline", {
-        elementOrSelector: "#my-cal-inline-free-quote-inspection",
+      Cal.ns["pro-clean"]("inline", {
+        elementOrSelector: "#my-cal-inline-pro-clean",
         config: { "layout": "month_view", "useSlotsViewOnSmallScreen": "true", "theme": "light" },
-        calLink: "reid-scott-wp1rhh/free-quote-inspection"
+        calLink: "reid-scott-wp1rhh/pro-clean"
       });
-      Cal.ns["free-quote-inspection"]("ui", { "theme": "light", "hideEventTypeDetails": false, "layout": "month_view" });
+      Cal.ns["pro-clean"]("ui", { "theme": "light", "hideEventTypeDetails": false, "layout": "month_view" });
+      // Remove the "Loading…" placeholder once Cal injects its iframe.
+      var ph = calEl.querySelector('.cal-loading');
+      if (ph && 'MutationObserver' in window) {
+        var mo = new MutationObserver(function () {
+          if (calEl.querySelector('iframe')) { ph.remove(); mo.disconnect(); }
+        });
+        mo.observe(calEl, { childList: true });
+      }
     };
     // Load on approach or first interaction (instant), and warm up during idle so it's
     // usually ready before the user even reaches it.
