@@ -78,18 +78,6 @@
   .fn-picked span{font-size:12.5px;font-weight:700;color:var(--blue-ink);background:#EAF5FE;border-radius:999px;padding:6px 10px}
   .fn-fine{font-size:12.5px;color:var(--ink-muted);text-align:center;margin-top:12px;line-height:1.5}
   .fn-step[hidden]{display:none}
-  .field .opt{font-weight:500;color:var(--ink-muted)}
-  .fn-drop{display:flex;align-items:center;gap:12px;padding:14px;border:1.8px dashed rgba(17,135,218,0.45);border-radius:12px;background:#F5FAFE;color:var(--blue-ink);cursor:pointer;font-size:13px;font-weight:500;line-height:1.35;-webkit-tap-highlight-color:transparent}
-  .fn-drop svg{flex-shrink:0}
-  .fn-drop span{color:var(--ink-muted)}
-  .fn-drop b{display:block;font-size:15px;color:var(--blue-ink)}
-  #fPhotos:focus-visible + .fn-drop{outline:3px solid var(--blue-bright);outline-offset:2px}
-  .fn-drop:hover{border-color:var(--blue);background:#EEF7FE}
-  .fn-thumbs{display:flex;gap:8px;flex-wrap:wrap}
-  .fn-thumbs:empty{display:none}
-  .fn-thumb{position:relative;width:72px;height:72px;border-radius:10px;overflow:hidden;background:var(--wash-2)}
-  .fn-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .fn-thumb button{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:0;background:rgba(14,30,42,0.8);color:#fff;font-size:14px;line-height:1;cursor:pointer}
   .fn-done{text-align:center;padding:10px 4px 6px;outline:none}
   .fn-done-ico{width:68px;height:68px;border-radius:50%;margin:0 auto 18px;background:linear-gradient(135deg,#2A9BEA,#0E74C4);display:flex;align-items:center;justify-content:center;box-shadow:0 14px 34px rgba(17,135,218,0.34)}
   .fn-done h2{font-size:24px;margin-bottom:10px}
@@ -187,15 +175,6 @@
           <label for="fAddr">Address</label>
           <input id="fAddr" name="address" type="text" autocomplete="street-address" placeholder="Street address &amp; city" required>
         </div>
-        <div class="field">
-          <label for="fPhotos">Photos <span class="opt">(optional)</span></label>
-          <input id="fPhotos" type="file" accept="image/*" multiple class="sr-only">
-          <label class="fn-drop" for="fPhotos">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            <span><b>Add photos of the area</b>Helps us give you an accurate price. Up to 3.</span>
-          </label>
-          <div class="fn-thumbs" id="fnThumbs"></div>
-        </div>
         <input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
         <div class="fn-err" id="err2">Please fill in your name, phone, and address.</div>
         <button type="submit" class="btn btn-primary fn-btn" id="fnSubmit">Get my free quote</button>
@@ -237,15 +216,12 @@
 (function () {
   "use strict";
   var WEB3FORMS_KEY = '2aac74f7-51f5-4885-bf0e-ec74252de553';
-  var MAX_PHOTOS = 3;
 
   var form = document.getElementById('fnForm');
   var s1 = document.getElementById('step1'), s2 = document.getElementById('step2'), s3 = document.getElementById('step3');
   var bar = document.getElementById('fnBar'), lbl = document.getElementById('fnStepLbl');
   var err1 = document.getElementById('err1'), err2 = document.getElementById('err2');
   var submit = document.getElementById('fnSubmit');
-  var photoInput = document.getElementById('fPhotos'), thumbs = document.getElementById('fnThumbs');
-  var photos = [];
 
   function picked() {
     return Array.prototype.map.call(form.querySelectorAll('input[name="service"]:checked'), function (c) { return c.value; });
@@ -272,42 +248,7 @@
   });
   document.getElementById('toStep1').addEventListener('click', function () { go(1); });
 
-  // ---- Optional photos: shrink on the phone before upload so it stays fast ----
-  function shrink(file) {
-    return new Promise(function (resolve) {
-      var url = URL.createObjectURL(file);
-      var img = new Image();
-      img.onload = function () {
-        var max = 1600, w = img.naturalWidth, h = img.naturalHeight, k = Math.min(1, max / Math.max(w, h));
-        var cv = document.createElement('canvas');
-        cv.width = Math.round(w * k); cv.height = Math.round(h * k);
-        cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
-        cv.toBlob(function (b) {
-          URL.revokeObjectURL(url);
-          resolve(b ? new File([b], (file.name || 'photo').replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' }) : file);
-        }, 'image/jpeg', 0.75);
-      };
-      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
-      img.src = url;
-    });
-  }
-  function renderThumbs() {
-    thumbs.innerHTML = '';
-    photos.forEach(function (f, i) {
-      var d = document.createElement('div'); d.className = 'fn-thumb';
-      var im = document.createElement('img'); im.src = URL.createObjectURL(f); im.alt = 'Photo ' + (i + 1);
-      var x = document.createElement('button'); x.type = 'button'; x.setAttribute('aria-label', 'Remove photo ' + (i + 1)); x.textContent = '×';
-      x.addEventListener('click', function () { photos.splice(i, 1); renderThumbs(); });
-      d.appendChild(im); d.appendChild(x); thumbs.appendChild(d);
-    });
-  }
-  photoInput.addEventListener('change', function () {
-    var files = Array.prototype.slice.call(photoInput.files, 0, MAX_PHOTOS - photos.length);
-    photoInput.value = '';
-    Promise.all(files.map(shrink)).then(function (out) { photos = photos.concat(out).slice(0, MAX_PHOTOS); renderThumbs(); });
-  });
-
-  function send(withPhotos, values) {
+  function send(values) {
     var fd = new FormData();
     fd.append('access_key', WEB3FORMS_KEY);
     fd.append('subject', 'New door hanger lead: ' + values.name);
@@ -317,11 +258,6 @@
     fd.append('Address', values.address);
     fd.append('Services', values.services);
     fd.append('Source', values.source);
-    if (withPhotos) {
-      photos.forEach(function (f, i) { fd.append('attachment' + (i ? i + 1 : ''), f, f.name); });
-    } else if (photos.length) {
-      fd.append('Photos', photos.length + ' photo(s) selected but the upload failed. Ask the customer to text them to you.');
-    }
     return fetch('https://api.web3forms.com/submit', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd })
       .then(function (r) { return r.json().catch(function () { return {}; }); })
       .then(function (j) { if (!j.success) throw new Error(j.message || 'Submit failed'); });
@@ -348,10 +284,9 @@
       services: picked().join(', '),
       source: new URLSearchParams(location.search).get('src') || 'Door hanger QR'
     };
-    submit.disabled = true; submit.textContent = photos.length ? 'Uploading photos…' : 'Sending…';
+    submit.disabled = true; submit.textContent = 'Sending…';
 
-    send(photos.length > 0, values)
-      .catch(function () { return photos.length ? send(false, values) : Promise.reject(); })
+    send(values)
       .then(function () {
         document.getElementById('fnDoneName').textContent = ', ' + values.name.split(' ')[0];
         go(3);
