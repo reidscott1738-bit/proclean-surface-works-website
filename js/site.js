@@ -1,81 +1,123 @@
 (function () {
   "use strict";
+  var WEB3FORMS_KEY = '2aac74f7-51f5-4885-bf0e-ec74252de553';
 
-  // ---- Nav: shadow on scroll ----
-  var nav = document.getElementById('nav');
-  if (nav) {
+  // ---- Header shadow (writes only on state change) ----
+  var header = document.querySelector('.site-header');
+  var mBar = document.getElementById('mBar');
+  var quote = document.getElementById('quote');
+  if (header) {
     var scrolled = null;
     var onScroll = function () {
-      var y = window.scrollY > 30;
-      if (y !== scrolled) { scrolled = y; nav.classList.toggle('scrolled', y); }
+      var s = window.scrollY > 8;
+      if (s !== scrolled) { scrolled = s; header.classList.toggle('scrolled', s); }
     };
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   }
 
-  // ---- Mobile menu toggle ----
+  // ---- Hide the mobile action bar while the quote form or footer is on screen ----
+  if (mBar && 'IntersectionObserver' in window) {
+    var hideFor = [quote, document.querySelector('.site-footer')].filter(Boolean);
+    var visible = new Set();
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); });
+      mBar.classList.toggle('hide', visible.size > 0);
+    });
+    hideFor.forEach(function (el) { io.observe(el); });
+  }
+
+  // ---- Mobile menu ----
   var toggle = document.getElementById('navToggle');
-  var links = document.getElementById('navLinks');
-  if (toggle && links) {
+  var nav = document.getElementById('siteNav');
+  function closeNav() {
+    if (!nav) return;
+    nav.classList.remove('open'); document.body.classList.remove('nav-open');
+    if (toggle) toggle.setAttribute('aria-expanded', 'false');
+  }
+  if (toggle && nav) {
     toggle.addEventListener('click', function () {
-      var open = links.classList.toggle('open');
-      toggle.classList.toggle('open', open);
+      var open = !nav.classList.contains('open');
+      nav.classList.toggle('open', open); document.body.classList.toggle('nav-open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
-    links.querySelectorAll('a').forEach(function (a) {
-      a.addEventListener('click', function () {
-        links.classList.remove('open');
-        toggle.classList.remove('open');
-        toggle.setAttribute('aria-expanded', 'false');
-      });
-    });
+    nav.addEventListener('click', function (e) { if (e.target.closest('a')) closeNav(); });
   }
 
-  // ---- Before / After sliders ----
-  document.querySelectorAll('.ba-slider').forEach(function (s) {
-    var handle = s.querySelector('.ba-handle');
-    var pos = 50, dragging = false;
-    function set(v) {
-      pos = Math.max(0, Math.min(100, v));
-      s.style.setProperty('--pos', pos + '%');
-      if (handle) handle.setAttribute('aria-valuenow', Math.round(pos));
-    }
-    function fromEvent(e) {
-      var r = s.getBoundingClientRect();
-      var cx = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
-      set((cx - r.left) / r.width * 100);
-    }
-    s.addEventListener('pointerdown', function (e) {
-      dragging = true;
-      if (s.setPointerCapture) { try { s.setPointerCapture(e.pointerId); } catch (x) {} }
-      fromEvent(e);
+  // ---- Services dropdown (click/tap + keyboard; hover on desktop) ----
+  document.querySelectorAll('.has-sub').forEach(function (li) {
+    var btn = li.querySelector('.nav-sub-btn');
+    var set = function (open) { li.classList.toggle('open', open); btn.setAttribute('aria-expanded', open ? 'true' : 'false'); };
+    btn.addEventListener('click', function () { set(!li.classList.contains('open')); });
+    var fine = window.matchMedia('(hover:hover) and (min-width:961px)');
+    li.addEventListener('mouseenter', function () { if (fine.matches) set(true); });
+    li.addEventListener('mouseleave', function () { if (fine.matches) set(false); });
+    li.addEventListener('focusout', function (e) { if (!li.contains(e.relatedTarget)) set(false); });
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    document.querySelectorAll('.has-sub.open').forEach(function (li) {
+      li.classList.remove('open'); var b = li.querySelector('.nav-sub-btn'); b.setAttribute('aria-expanded', 'false'); b.focus();
     });
-    s.addEventListener('pointermove', function (e) { if (dragging) fromEvent(e); });
-    window.addEventListener('pointerup', function () { dragging = false; });
-    if (handle) {
-      handle.addEventListener('keydown', function (e) {
-        if (e.key === 'ArrowLeft') { set(pos - 4); e.preventDefault(); }
-        if (e.key === 'ArrowRight') { set(pos + 4); e.preventDefault(); }
-      });
-    }
-    set(50);
+    if (nav && nav.classList.contains('open')) { closeNav(); toggle.focus(); }
   });
 
-  // ---- Subtle reveal on scroll (safe: only hides once JS confirms support) ----
-  if ('IntersectionObserver' in window && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var els = document.querySelectorAll('.reveal');
-    if (els.length) {
-      document.body.classList.add('reveal-on');
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) {
-          if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-        });
-      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
-      els.forEach(function (el) { io.observe(el); });
-    }
-  }
+  // ---- Quote forms -> Web3Forms ----
+  document.querySelectorAll('[data-quote-form]').forEach(function (form) {
+    var status = form.querySelector('.qf-status');
+    var btn = form.querySelector('button[type="submit"]');
+    var done = form.parentNode.querySelector('.qform-done');
+    var label = btn.textContent;
 
-  // ---- Cal.com booking widget (lazy — only loads when scrolled near) ----
+    function check(input) {
+      var v = input.value.trim(), bad = !v;
+      if (input.name === 'phone') bad = v.replace(/\D/g, '').length < 10;
+      input.setAttribute('aria-invalid', bad ? 'true' : 'false');
+      var err = document.getElementById(input.id + '-err');
+      if (err) { if (bad) input.setAttribute('aria-describedby', err.id); else input.removeAttribute('aria-describedby'); }
+      return !bad;
+    }
+    form.querySelectorAll('[required]').forEach(function (i) {
+      i.addEventListener('blur', function () { if (i.value) check(i); });
+      i.addEventListener('input', function () { if (i.getAttribute('aria-invalid') === 'true') check(i); });
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      status.textContent = '';
+      var firstBad = null;
+      form.querySelectorAll('[required]').forEach(function (i) { if (!check(i) && !firstBad) firstBad = i; });
+      if (firstBad) { firstBad.focus(); return; }
+      if (form.elements['botcheck'] && form.elements['botcheck'].checked) return;
+
+      var fd = new FormData();
+      fd.append('access_key', WEB3FORMS_KEY);
+      fd.append('subject', 'New website quote request: ' + form.elements['name'].value.trim());
+      fd.append('from_name', 'procleansurfaces.com');
+      fd.append('Name', form.elements['name'].value.trim());
+      fd.append('Phone', form.elements['phone'].value.trim());
+      fd.append('Address', form.elements['address'].value.trim());
+      fd.append('Service', form.elements['service'].value);
+      if (form.elements['message'].value.trim()) fd.append('Message', form.elements['message'].value.trim());
+      fd.append('Page', location.pathname);
+
+      btn.disabled = true; btn.textContent = 'Sending…';
+      fetch('https://api.web3forms.com/submit', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd })
+        .then(function (r) { return r.json().catch(function () { return {}; }); })
+        .then(function (j) {
+          if (!j.success) throw new Error('fail');
+          form.hidden = true;
+          if (done) { done.hidden = false; done.focus(); }
+          if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', { form: location.pathname });
+        })
+        .catch(function () {
+          btn.disabled = false; btn.textContent = label;
+          status.innerHTML = 'That didn’t go through. Your details are still here, so please try again, or call or text <a href="tel:+12253635220">(225) 363-5220</a>.';
+        });
+    });
+  });
+
+  // ---- Cal.com booking (contact page only; loads when scrolled near) ----
   var calEl = document.getElementById('my-cal-inline-pro-clean');
   if (calEl) {
     var calLoaded = false;
@@ -83,36 +125,21 @@
       if (calLoaded) return; calLoaded = true;
       (function (C, A, L) { var p = function (a, ar) { a.q.push(ar); }; var d = C.document; C.Cal = C.Cal || function () { var cal = C.Cal; var ar = arguments; if (!cal.loaded) { cal.ns = {}; cal.q = cal.q || []; d.head.appendChild(d.createElement("script")).src = A; cal.loaded = true; } if (ar[0] === L) { var api = function () { p(api, arguments); }; var namespace = ar[1]; api.q = api.q || []; if (typeof namespace === "string") { cal.ns[namespace] = cal.ns[namespace] || api; p(cal.ns[namespace], ar); p(cal, ["initNamespace", namespace]); } else p(cal, ar); return; } p(cal, ar); }; })(window, "https://app.cal.com/embed/embed.js", "init");
       Cal("init", "pro-clean", { origin: "https://app.cal.com" });
-      Cal.config = Cal.config || {};
-      Cal.config.forwardQueryParams = true;
       Cal.ns["pro-clean"]("inline", {
         elementOrSelector: "#my-cal-inline-pro-clean",
         config: { "layout": "month_view", "useSlotsViewOnSmallScreen": "true", "theme": "light" },
         calLink: "reid-scott-wp1rhh/pro-clean"
       });
       Cal.ns["pro-clean"]("ui", { "theme": "light", "hideEventTypeDetails": false, "layout": "month_view" });
-      // Remove the "Loading…" placeholder once Cal injects its iframe.
       var ph = calEl.querySelector('.cal-loading');
       if (ph && 'MutationObserver' in window) {
-        var mo = new MutationObserver(function () {
-          if (calEl.querySelector('iframe')) { ph.remove(); mo.disconnect(); }
-        });
+        var mo = new MutationObserver(function () { if (calEl.querySelector('iframe')) { ph.remove(); mo.disconnect(); } });
         mo.observe(calEl, { childList: true });
       }
     };
-    // Load on approach or first interaction (instant), and warm up during idle so it's
-    // usually ready before the user even reaches it.
     if ('IntersectionObserver' in window) {
-      var cio = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) { if (e.isIntersecting) { loadCal(); cio.disconnect(); } });
-      }, { rootMargin: '1400px' });
+      var cio = new IntersectionObserver(function (en) { if (en[0].isIntersecting) { loadCal(); cio.disconnect(); } }, { rootMargin: '600px' });
       cio.observe(calEl);
-    }
-    var kick = function () { loadCal(); };
-    ['scroll', 'pointerdown', 'touchstart', 'keydown'].forEach(function (ev) {
-      window.addEventListener(ev, kick, { passive: true, once: true });
-    });
-    var idle = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1200); };
-    idle(function () { loadCal(); }, { timeout: 2500 });
+    } else { loadCal(); }
   }
 })();

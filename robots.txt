@@ -1,10 +1,11 @@
-# robots.txt — Pro Clean Surface Works
+# robots.txt - Pro Clean Surface Works
 # https://procleansurfaces.com
 
 User-agent: *
 Allow: /
+Disallow: /_build/
 
-# AI crawlers — explicitly welcomed
+# AI / answer-engine crawlers welcome
 User-agent: GPTBot
 Allow: /
 

@@ -9,40 +9,21 @@ Built to rank locally for "pressure washing baton rouge" and related terms, and 
 
 ## Structure
 
+Pages are generated. **Edit the sources in `_build/pages/`, never the generated HTML**, then rebuild:
+
 ```
-index.html                         Home — targets "pressure washing baton rouge"
-contact.html                       Contact + free-quote form
-reviews.html                       Reviews (real testimonials + Google review CTA)
-css/site.css                       Shared design system (edit once, applies everywhere)
-fonts/inter-var.woff2              Self-hosted variable font (zero CLS)
-images/logo.svg                    Brand mark / favicon
-images/og-image.*                  Social share image (see "To do" below)
-robots.txt, sitemap.xml, llms.txt  Technical SEO
-.htaccess                          HTTPS + non-www redirect, caching, compression
-
-Service pages (dirs):
-  residential-pressure-washing-baton-rouge/
-  commercial-pressure-washing-baton-rouge/
-  house-washing-baton-rouge/
-  driveway-cleaning-baton-rouge/
-  sidewalk-cleaning-baton-rouge/
-  power-washing-baton-rouge/
-
-Location pages (dirs):
-  pressure-washing-baton-rouge/
-  pressure-washing-prairieville/
-  pressure-washing-gonzales/
-  pressure-washing-denham-springs/
-  pressure-washing-geismar/
-  pressure-washing-saint-gabriel/
+powershell -ExecutionPolicy Bypass -File _build\build.ps1
 ```
 
-## Editing
+- `_build/pages/*.html` - one file per page: a JSON meta block (url, title, description, FAQs, schema hints) followed by the page body.
+- `_build/build.ps1` - adds the shared header, footer, quote form, JSON-LD schema, breadcrumbs and FAQ markup, writes every page to the site root and regenerates `sitemap.xml`.
+- Body placeholders: `<!--faq-->`, `<!--quote-->`, `<!--reviews-->`, `<!--areas-->`, `<!--services-->`, `<!--pair:key:lg-->`, `<!--work:key,key,key-->`, `<!--aside:Heading^Label|/url~Label|/url-->`, `<!--crumbs-->`.
+- FAQ text lives only in the meta block, so the visible FAQ and the FAQPage schema always match.
+- `css/site.css` - design system. `js/site.js` - menu, quote form (Web3Forms), lazy Cal.com embed.
+- `doorhangers/` is hand-written (QR landing page, noindex) and is not generated.
+- `_build/` is blocked in robots.txt and .htaccess.
 
-- **Design/colors/layout:** edit `css/site.css` — it's the single source of truth for every page.
-- **Business facts** (phone, email, service list, areas) appear in each page's JSON-LD schema and footer. Keep them identical everywhere (NAP consistency matters for local ranking).
-- Every page's phone is `(225) 363-5220` → `tel:+12253635220` / `sms:+12253635220`.
-
+Page types: home, 8 service pages, 9 town pages, 4 audience pages, 8 guides, our-work, about, contact, reviews, service-areas, resources, privacy, terms, 404, thankyou.
 ## Contact / NAP
 
 - Pro Clean Surface Works

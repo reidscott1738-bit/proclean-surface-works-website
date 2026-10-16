@@ -63,4 +63,10 @@
   RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 </IfModule>
 
-# NOTE: no ErrorDocument 404 -> index.html (that would create soft 404s).
+# Real 404 page (returns a 404 status; never point this at the homepage).
+ErrorDocument 404 /404.html
+
+# Page sources for the site builder are not public.
+<IfModule mod_rewrite.c>
+  RewriteRule ^_build(/|$) - [F,L]
+</IfModule>
