@@ -63,57 +63,75 @@
     if (nav && nav.classList.contains('open')) { closeNav(); toggle.focus(); }
   });
 
-  // ---- Quote forms -> Web3Forms ----
-  document.querySelectorAll('[data-quote-form]').forEach(function (form) {
-    var status = form.querySelector('.qf-status');
-    var btn = form.querySelector('button[type="submit"]');
-    var done = form.parentNode.querySelector('.qform-done');
-    var label = btn.textContent;
+  // ---- Quote funnel -> Web3Forms (same two-step flow as the door hanger page) ----
+  document.querySelectorAll('[data-funnel]').forEach(function (form) {
+    var steps = {}; form.querySelectorAll('[data-step]').forEach(function (s) { steps[s.getAttribute('data-step')] = s; });
+    var bar = form.querySelector('[data-fn-bar]'), lbl = form.querySelector('[data-fn-lbl]');
+    var err1 = form.querySelector('[data-err="1"]'), err2 = form.querySelector('[data-err="2"]');
+    var submit = form.querySelector('[data-submit]');
 
-    function check(input) {
-      var v = input.value.trim(), bad = !v;
-      if (input.name === 'phone') bad = v.replace(/\D/g, '').length < 10;
-      input.setAttribute('aria-invalid', bad ? 'true' : 'false');
-      var err = document.getElementById(input.id + '-err');
-      if (err) { if (bad) input.setAttribute('aria-describedby', err.id); else input.removeAttribute('aria-describedby'); }
-      return !bad;
+    function picked() {
+      return Array.prototype.map.call(form.querySelectorAll('input[name="service"]:checked'), function (c) { return c.value; });
     }
-    form.querySelectorAll('[required]').forEach(function (i) {
-      i.addEventListener('blur', function () { if (i.value) check(i); });
-      i.addEventListener('input', function () { if (i.getAttribute('aria-invalid') === 'true') check(i); });
+    function go(n) {
+      Object.keys(steps).forEach(function (k) { steps[k].hidden = String(n) !== k; });
+      bar.style.width = n === 1 ? '50%' : '100%';
+      lbl.textContent = n === 3 ? 'Done' : 'Step ' + n + ' of 2';
+      var top = form.getBoundingClientRect().top;
+      if (top < 0 || top > window.innerHeight * 0.6) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    form.querySelectorAll('input[name="service"]').forEach(function (c) {
+      c.addEventListener('change', function () { if (picked().length) err1.classList.remove('on'); });
     });
+    form.querySelector('[data-next]').addEventListener('click', function () {
+      var p = picked();
+      if (!p.length) { err1.classList.add('on'); return; }
+      var box = form.querySelector('[data-picked]'); box.innerHTML = '';
+      p.forEach(function (v) { var s = document.createElement('span'); s.textContent = v; box.appendChild(s); });
+      go(2);
+      setTimeout(function () { form.elements['name'].focus({ preventScroll: true }); }, 350);
+    });
+    form.querySelector('[data-back]').addEventListener('click', function () { go(1); });
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-      status.textContent = '';
-      var firstBad = null;
-      form.querySelectorAll('[required]').forEach(function (i) { if (!check(i) && !firstBad) firstBad = i; });
-      if (firstBad) { firstBad.focus(); return; }
+      var fields = ['name', 'phone', 'address'].map(function (n) { return form.elements[n]; });
+      var ok = true, firstBad = null;
+      fields.forEach(function (f) {
+        var v = f.value.trim();
+        var bad = !v || (f.name === 'phone' && v.replace(/\D/g, '').length < 10);
+        f.classList.toggle('bad', bad); f.setAttribute('aria-invalid', bad ? 'true' : 'false');
+        if (bad) { ok = false; if (!firstBad) firstBad = f; }
+      });
+      if (!ok) { err2.textContent = 'Please fill in your name, a valid phone number, and your address.'; err2.classList.add('on'); firstBad.focus(); return; }
+      err2.classList.remove('on');
       if (form.elements['botcheck'] && form.elements['botcheck'].checked) return;
 
+      var name = fields[0].value.trim();
       var fd = new FormData();
       fd.append('access_key', WEB3FORMS_KEY);
-      fd.append('subject', 'New website quote request: ' + form.elements['name'].value.trim());
+      fd.append('subject', 'New website quote request: ' + name);
       fd.append('from_name', 'procleansurfaces.com');
-      fd.append('Name', form.elements['name'].value.trim());
-      fd.append('Phone', form.elements['phone'].value.trim());
-      fd.append('Address', form.elements['address'].value.trim());
-      fd.append('Service', form.elements['service'].value);
-      if (form.elements['message'].value.trim()) fd.append('Message', form.elements['message'].value.trim());
-      fd.append('Page', location.pathname);
+      fd.append('Name', name);
+      fd.append('Phone', fields[1].value.trim());
+      fd.append('Address', fields[2].value.trim());
+      fd.append('Services', picked().join(', '));
+      fd.append('Source', 'Website: ' + location.pathname);
 
-      btn.disabled = true; btn.textContent = 'Sending…';
+      submit.disabled = true; submit.textContent = 'Sending…';
       fetch('https://api.web3forms.com/submit', { method: 'POST', headers: { 'Accept': 'application/json' }, body: fd })
         .then(function (r) { return r.json().catch(function () { return {}; }); })
         .then(function (j) {
           if (!j.success) throw new Error('fail');
-          form.hidden = true;
-          if (done) { done.hidden = false; done.focus(); }
+          form.querySelector('[data-done-name]').textContent = ', ' + name.split(' ')[0];
+          go(3); steps['3'].focus({ preventScroll: true });
           if (typeof window.gtag === 'function') window.gtag('event', 'generate_lead', { form: location.pathname });
         })
         .catch(function () {
-          btn.disabled = false; btn.textContent = label;
-          status.innerHTML = 'That didn’t go through. Your details are still here, so please try again, or call or text <a href="tel:+12253635220">(225) 363-5220</a>.';
+          submit.disabled = false; submit.textContent = 'Get my free quote';
+          err2.innerHTML = 'That didn’t go through. Your details are still here, so please try again, or call or text <a href="tel:+12253635220">(225) 363-5220</a>.';
+          err2.classList.add('on');
         });
     });
   });

@@ -9,7 +9,7 @@ $Pages = Join-Path $PSScriptRoot 'pages'
 $Site  = 'https://procleansurfaces.com'
 $Today = (Get-Date).ToString('yyyy-MM-dd')
 $utf8  = New-Object Text.UTF8Encoding $false
-$CssV  = '20261017'
+$CssV  = '20261018'
 
 function Enc([string]$s) { [System.Net.WebUtility]::HtmlEncode($s) }
 
@@ -161,29 +161,49 @@ function Render-ServiceList {
 function Render-Quote([string]$heading, [string]$intro) {
   if (-not $heading) { $heading = 'Ready for a cleaner property?' }
   if (-not $intro) { $intro = 'Send a few details and we will get back to you within a day. Rather talk? Call or text (225) 363-5220.' }
-  $opts = ($QuoteServices | ForEach-Object { "<option>$(Enc $_)</option>" }) -join ''
+  $ck = '<span class="ck"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>'
+  $opts = @(
+    @('Concrete & driveway cleaning','Concrete &amp; driveway','<path d="M4 21 8 3"/><path d="M20 21 16 3"/><path d="M12 5v2"/><path d="M12 11v2"/><path d="M12 17v2"/>'),
+    @('House soft wash','House soft wash','<path d="m3 11 9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>'),
+    @('Sidewalk & curb cleaning','Sidewalk &amp; curb','<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M3 15h18"/><path d="M12 4v6"/><path d="M8 10v5"/><path d="M16 10v5"/><path d="M12 15v5"/>'),
+    @('Garbage can cleaning','Garbage can cleaning','<path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M5 6l1.2 14a2 2 0 0 0 2 2h7.6a2 2 0 0 0 2-2L19 6"/><path d="M10 11v6"/><path d="M14 11v6"/>')
+  )
+  $i = 0
+  $tiles = ($opts | ForEach-Object { $i++; "<div class=`"svc-opt`"><input type=`"checkbox`" id=`"qs$i`" name=`"service`" value=`"$(Enc $_[0])`"><label for=`"qs$i`"><span class=`"ico`"><svg width=`"22`" height=`"22`" viewBox=`"0 0 24 24`" fill=`"none`" stroke=`"currentColor`" stroke-width=`"2`" stroke-linecap=`"round`" stroke-linejoin=`"round`" aria-hidden=`"true`">$($_[2])</svg></span><span class=`"nm`">$($_[1])</span>$ck</label></div>" }) -join ''
   @"
 <section class="quote-band" id="quote" aria-labelledby="quote-h"><div class="container quote-grid">
 <div class="quote-copy"><p class="label">Free quote</p><h2 id="quote-h" class="h2">$heading</h2><p class="lede">$intro</p>
 <a class="btn btn-outline btn-lg" href="$Tel">Call now</a>
 <ul class="quote-alt"><li><span>Call or text</span><a href="$Tel">$Phone</a></li><li><span>Email</span><a href="mailto:$Email">$Email</a></li></ul></div>
-<div>
-<form class="qform" data-quote-form novalidate>
-<p class="qform-eyebrow">Free, no obligation</p>
-<h3>Tell us about your property</h3>
-<div class="qf-grid">
-<div class="qf"><label for="q-name">Name</label><input id="q-name" name="name" type="text" autocomplete="name" required><p class="qf-err" id="q-name-err">Please enter your name.</p></div>
-<div class="qf"><label for="q-phone">Phone</label><input id="q-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required><p class="qf-err" id="q-phone-err">Please enter a 10-digit phone number.</p></div>
-<div class="qf qf-full"><label for="q-addr">Address or town</label><input id="q-addr" name="address" type="text" autocomplete="street-address" required><p class="qf-err" id="q-addr-err">Please enter an address or town so we can price it.</p></div>
-<div class="qf qf-full"><label for="q-svc">What needs cleaning?</label><select id="q-svc" name="service">$opts</select></div>
-<div class="qf qf-full"><label for="q-msg">Anything else? <span class="opt">(optional)</span></label><textarea id="q-msg" name="message" rows="3"></textarea></div>
+<form class="fn-box" data-funnel novalidate>
+<div class="fn-progress" aria-hidden="true"><div class="bar"><i data-fn-bar></i></div><span data-fn-lbl>Step 1 of 2</span></div>
+<div class="fn-step" data-step="1">
+<h3>What do you need cleaned?</h3>
+<p class="sub">Pick one or more.</p>
+<fieldset class="svc-pick"><legend class="sr-only">Services</legend>$tiles</fieldset>
+<p class="fn-err" data-err="1" role="alert">Pick at least one service to continue.</p>
+<button type="button" class="btn btn-primary fn-btn" data-next>Next &rarr;</button>
 </div>
-<input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-<div class="qf-foot"><button type="submit" class="btn btn-primary btn-lg">Get my free quote</button><p class="qf-fine">We reply within a day.</p></div>
-<p class="qf-status" role="status" aria-live="polite"></p>
+<div class="fn-step" data-step="2" hidden>
+<h3>Where should we send your quote?</h3>
+<p class="sub">We&rsquo;ll call you with your price. No spam, ever.</p>
+<div class="fn-picked" data-picked></div>
+<div class="field"><label for="qName">Name</label><input id="qName" name="name" type="text" autocomplete="name" placeholder="Your name" required></div>
+<div class="field"><label for="qPhone">Phone</label><input id="qPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(225) 555-0123" required></div>
+<div class="field"><label for="qAddr">Address</label><input id="qAddr" name="address" type="text" autocomplete="street-address" placeholder="Street address &amp; city" required></div>
+<input type="checkbox" name="botcheck" tabindex="-1" autocomplete="off" style="display:none" aria-hidden="true">
+<p class="fn-err" data-err="2" role="alert">Please fill in your name, phone, and address.</p>
+<button type="submit" class="btn btn-primary fn-btn" data-submit>Get my free quote</button>
+<button type="button" class="fn-back" data-back>&larr; Back</button>
+<p class="fn-fine">Free &amp; no obligation. We get back to you within a day.</p>
+</div>
+<div class="fn-step fn-done" data-step="3" hidden tabindex="-1">
+<div class="fn-done-ico"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div>
+<h3>We&rsquo;ll reach out with your quote as soon as possible<span data-done-name></span>!</h3>
+<p>Thanks for requesting a free quote. Someone from our team will give you a call to go over your price.</p>
+<p class="fn-done-small">Need us sooner? Call or text <a href="$Tel">$Phone</a>.</p>
+</div>
 </form>
-<div class="qform-done" hidden tabindex="-1"><h3>Thanks, we&rsquo;ve got it.</h3><p>We&rsquo;ll reach out with your quote as soon as possible. Need us sooner? Call or text <a href="$Tel">$Phone</a>.</p></div>
-</div>
 </div></section>
 "@
 }
