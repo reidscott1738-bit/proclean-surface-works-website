@@ -38,6 +38,7 @@
   if (toggle && nav) {
     toggle.addEventListener('click', function () {
       var open = !nav.classList.contains('open');
+      if (open && header) nav.style.top = Math.max(0, header.getBoundingClientRect().bottom) + 'px';
       nav.classList.toggle('open', open); document.body.classList.toggle('nav-open', open);
       toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
     });

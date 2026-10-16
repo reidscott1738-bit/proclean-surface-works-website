@@ -9,7 +9,7 @@ $Pages = Join-Path $PSScriptRoot 'pages'
 $Site  = 'https://procleansurfaces.com'
 $Today = (Get-Date).ToString('yyyy-MM-dd')
 $utf8  = New-Object Text.UTF8Encoding $false
-$CssV  = '20261016'
+$CssV  = '20261017'
 
 function Enc([string]$s) { [System.Net.WebUtility]::HtmlEncode($s) }
 
@@ -36,17 +36,18 @@ $Areas = [ordered]@{
 }
 
 $Work = [ordered]@{
-  'driveway-white'  = 'Driveway and brick-edged front walk on a white brick home'
-  'driveway-curb'   = 'Driveway, curb and street-side sidewalk'
-  'entry'           = 'Covered front entry'
-  'patio'           = 'Covered back patio'
-  'sidewalk'        = 'Long front sidewalk'
-  'driveway-brick'  = 'Driveway on a red brick home'
-  'garage-apron'    = 'Driveway apron in front of the garage'
-  'side-walk'       = 'Side walkway along the house'
-  'porch-corner'    = 'Shaded corner of a covered porch'
-  'driveway-corner' = 'Corner-lot driveway'
+  'driveway-white'  = @('Driveway with brick border','Driveway and brick-edged front walk on a white brick home')
+  'driveway-curb'   = @('Cul-de-sac driveway','Driveway, curb and street-side sidewalk')
+  'entry'           = @('Front entry','Covered front entry')
+  'patio'           = @('Covered back patio','Covered back patio')
+  'sidewalk'        = @('Front sidewalk','Long front sidewalk')
+  'driveway-brick'  = @('Driveway and brick apron','Driveway on a red brick home')
+  'garage-apron'    = @('Garage apron','Driveway apron in front of the garage')
+  'side-walk'       = @('Side walkway','Side walkway along the house')
+  'porch-corner'    = @('Covered porch corner','Shaded corner of a covered porch')
+  'driveway-corner' = @('Driveway corner','Corner-lot driveway')
 }
+$QuoteServices = @('Driveway cleaning','House soft wash','Sidewalk and curb cleaning','Garbage can cleaning','Patio or pool deck','Commercial property','Something else')
 
 # ---------------------------------------------------------------- business schema node
 $Business = [ordered]@{
@@ -82,10 +83,17 @@ $Business = [ordered]@{
 }
 
 # ---------------------------------------------------------------- partial renderers
+function SecHead([string]$eyebrow, [string]$title, [string]$lead, [string]$id) {
+  $l = if ($lead) { "<p class=`"lede`">$lead</p>" } else { '' }
+  "<div class=`"sec-head`"><p class=`"label`">$eyebrow</p><h2 id=`"$id`" class=`"h2`">$title</h2>$l</div>"
+}
+
 function Render-Faq($faqs, $title) {
   if (-not $title) { $title = 'Common questions' }
   $sb = New-Object Text.StringBuilder
-  [void]$sb.Append("<section class=`"section faq-section`" aria-labelledby=`"faq-h`"><div class=`"container faq-wrap`"><div class=`"faq-head`"><p class=`"label`">Questions</p><h2 id=`"faq-h`" class=`"h2`">$(Enc $title)</h2><p>Still unsure? Call or text <a href=`"$Tel`">$Phone</a>.</p></div><div class=`"faq`">")
+  [void]$sb.Append("<section class=`"section faq-section`" aria-labelledby=`"faq-h`"><div class=`"container faq-wrap`">")
+  [void]$sb.Append((SecHead 'Questions' (Enc $title) "Still unsure? Call or text <a href=`"$Tel`">$Phone</a>." 'faq-h'))
+  [void]$sb.Append('<div class="faq">')
   foreach ($f in $faqs) { [void]$sb.Append("<details><summary>$(Enc $f[0])<span class=`"faq-x`" aria-hidden=`"true`"></span></summary><p>$(Enc $f[1])</p></details>") }
   [void]$sb.Append('</div></div></section>')
   $sb.ToString()
@@ -95,27 +103,32 @@ function Render-Pair([string]$key, [string]$size) {
   $cap = $Work[$key]
   $hero = $size -eq 'hero'; if ($hero) { $size = 'lg' }
   $load = if ($hero) { 'fetchpriority="high"' } else { 'loading="lazy"' }
-  $sizes = if ($size -eq 'lg') { '(max-width:760px) 50vw, 360px' } else { '(max-width:760px) 50vw, 260px' }
-  $img = { param($side) "<img src=`"/images/ba-$key-$side.webp`" srcset=`"/images/ba-$key-$side-420.webp 420w, /images/ba-$key-$side.webp 720w`" sizes=`"$sizes`" width=`"720`" height=`"900`" $load decoding=`"async`" alt=`"$(if($side -eq 'before'){'Before'}else{'After'}) cleaning: $(Enc $cap.ToLower())`">" }
-  "<figure class=`"pair pair-$size`"><div class=`"pair-imgs`"><div class=`"pair-side`">$(& $img 'before')<span class=`"tag`">Before</span></div><div class=`"pair-side`">$(& $img 'after')<span class=`"tag tag-after`">After</span></div></div><figcaption>$(Enc $cap)</figcaption></figure>"
+  $sizes = if ($size -eq 'lg') { '(max-width:900px) 50vw, 300px' } else { '(max-width:900px) 50vw, 200px' }
+  $img = { param($side) "<img src=`"/images/ba-$key-$side.webp`" srcset=`"/images/ba-$key-$side-420.webp 420w, /images/ba-$key-$side.webp 720w`" sizes=`"$sizes`" width=`"720`" height=`"900`" $load decoding=`"async`" alt=`"$(if($side -eq 'before'){'Before'}else{'After'}) cleaning: $(Enc $cap[1].ToLower())`">" }
+  "<figure class=`"ba`"><div class=`"ba-pair`"><div class=`"ba-side`">$(& $img 'before')<span class=`"chip`">Before</span></div><div class=`"ba-side`">$(& $img 'after')<span class=`"chip chip-after`">After</span></div></div><figcaption><p class=`"ba-title`">$(Enc $cap[0])</p><p class=`"ba-meta`">Baton Rouge area</p></figcaption></figure>"
 }
 
 function Render-Work([string]$keys, [string]$heading) {
   $list = $keys.Split(',') | ForEach-Object { $_.Trim() } | Where-Object { $_ }
-  if (-not $heading) { $heading = 'Recent work from our crew' }
+  if (-not $heading) { $heading = 'See the difference' }
   $sb = New-Object Text.StringBuilder
-  [void]$sb.Append("<section class=`"section work-strip`" aria-labelledby=`"work-h`"><div class=`"container`"><div class=`"work-head`"><div><p class=`"label`">Our work</p><h2 id=`"work-h`" class=`"h2`">$(Enc $heading)</h2></div><a class=`"link-arrow`" href=`"/our-work/`">See all our before &amp; after photos</a></div><div class=`"work-row`">")
+  [void]$sb.Append("<section class=`"section bg-alt`" aria-labelledby=`"work-h`"><div class=`"container`"><div class=`"sec-head-row`">")
+  [void]$sb.Append((SecHead 'Real results' (Enc $heading) 'Real jobs from around Baton Rouge. Same surface, before and after.' 'work-h'))
+  [void]$sb.Append("<a class=`"btn btn-outline`" href=`"/our-work/`">See all projects</a></div><div class=`"work-row`">")
   foreach ($k in $list) { [void]$sb.Append((Render-Pair $k 'sm')) }
   [void]$sb.Append('</div></div></section>')
   $sb.ToString()
 }
 
 function Render-Reviews {
+  $head = SecHead 'What customers say about us' 'Hard working and professional' 'Our customers keep using the same words. <span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span> 5.0 from local customers.' 'rev-h'
   @"
-<section class="section reviews-band" aria-labelledby="rev-h"><div class="container reviews-grid">
-<div class="reviews-head"><p class="label">Reviews</p><h2 id="rev-h" class="h2">What customers have said</h2><p class="rating-line"><span class="stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span> 5.0 from local customers</p><a class="link-arrow" href="/reviews.html">Read our reviews</a></div>
-<blockquote class="review"><p>&ldquo;Excellent result. Pleased with the professionalism and hustle.&rdquo;</p><footer>Phillip Smith, Baton Rouge</footer></blockquote>
-<blockquote class="review"><p>&ldquo;These young men are hard working and professional. The power washing was excellent.&rdquo;</p><footer>Pam Baker, Baton Rouge</footer></blockquote>
+<section class="section" aria-labelledby="rev-h"><div class="container">$head
+<div class="reviews-grid">
+<blockquote class="review"><p>Excellent result. Pleased with the professionalism and hustle.</p><footer>Phillip Smith, Baton Rouge</footer></blockquote>
+<blockquote class="review"><p>These young men are hard working and professional. The power washing was excellent.</p><footer>Pam Baker, Baton Rouge</footer></blockquote>
+</div>
+<p style="margin-top:28px"><a class="link-arrow" href="/reviews.html">Read our reviews</a></p>
 </div></section>
 "@
 }
@@ -132,35 +145,45 @@ function Render-Areas {
   $sb.ToString()
 }
 
+function Render-Chips {
+  $links = ($Areas.Values | ForEach-Object { $_ } | ForEach-Object { "<a href=`"$($_[1])`">$($_[0])</a>" }) -join ''
+  "<div class=`"chips`">$links</div>"
+}
+
 function Render-ServiceList {
   $sb = New-Object Text.StringBuilder
   [void]$sb.Append('<ul class="svc-list">')
-  $i = 1
-  foreach ($s in $Services) { [void]$sb.Append("<li><a href=`"$($s.url)`"><span class=`"svc-n`">0$i</span><span class=`"svc-t`"><b>$(Enc $s.name)</b><span>$(Enc $s.blurb)</span></span><span class=`"svc-go`" aria-hidden=`"true`">&rarr;</span></a></li>"); $i++ }
+  foreach ($s in $Services) { [void]$sb.Append("<li><a href=`"$($s.url)`"><span class=`"svc-t`"><b>$(Enc $s.name)</b><span>$(Enc $s.blurb)</span></span><span class=`"svc-go`" aria-hidden=`"true`">&rarr;</span></a></li>") }
   [void]$sb.Append('</ul>')
   $sb.ToString()
 }
 
 function Render-Quote([string]$heading, [string]$intro) {
-  if (-not $heading) { $heading = 'Get a free quote' }
-  if (-not $intro) { $intro = 'Tell us what needs cleaning and where. We&rsquo;ll get back to you with a price, usually the same day. Free, with no obligation to book.' }
-  $opts = ($Services | Where-Object { $_.name -ne 'Residential pressure washing' -and $_.name -ne 'Power washing' } | ForEach-Object { "<option>$(Enc $_.name)</option>" }) -join ''
+  if (-not $heading) { $heading = 'Ready for a cleaner property?' }
+  if (-not $intro) { $intro = 'Send a few details and we will get back to you within a day. Rather talk? Call or text (225) 363-5220.' }
+  $opts = ($QuoteServices | ForEach-Object { "<option>$(Enc $_)</option>" }) -join ''
   @"
 <section class="quote-band" id="quote" aria-labelledby="quote-h"><div class="container quote-grid">
-<div class="quote-copy"><p class="label label-light">Free quote</p><h2 id="quote-h" class="h2">$heading</h2><p>$intro</p>
-<ul class="quote-alt"><li><span>Call</span><a href="$Tel">$Phone</a></li><li><span>Text a photo</span><a href="$Sms">$Phone</a></li><li><span>Email</span><a href="mailto:$Email">$Email</a></li></ul></div>
+<div class="quote-copy"><p class="label">Free quote</p><h2 id="quote-h" class="h2">$heading</h2><p class="lede">$intro</p>
+<a class="btn btn-outline btn-lg" href="$Tel">Call now</a>
+<ul class="quote-alt"><li><span>Call or text</span><a href="$Tel">$Phone</a></li><li><span>Email</span><a href="mailto:$Email">$Email</a></li></ul></div>
+<div>
 <form class="qform" data-quote-form novalidate>
-<div class="qf-row"><div class="qf"><label for="q-name">Name</label><input id="q-name" name="name" type="text" autocomplete="name" required><p class="qf-err" id="q-name-err">Please enter your name.</p></div>
-<div class="qf"><label for="q-phone">Phone</label><input id="q-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required><p class="qf-err" id="q-phone-err">Please enter a 10-digit phone number.</p></div></div>
-<div class="qf"><label for="q-addr">Address or town</label><input id="q-addr" name="address" type="text" autocomplete="street-address" required><p class="qf-err" id="q-addr-err">Please enter an address or town so we can price it.</p></div>
-<div class="qf"><label for="q-svc">What needs cleaning?</label><select id="q-svc" name="service"><option>Not sure yet</option>$opts<option>Several of these</option></select></div>
-<div class="qf"><label for="q-msg">Anything else? <span class="opt">(optional)</span></label><textarea id="q-msg" name="message" rows="3"></textarea></div>
+<p class="qform-eyebrow">Free, no obligation</p>
+<h3>Tell us about your property</h3>
+<div class="qf-grid">
+<div class="qf"><label for="q-name">Name</label><input id="q-name" name="name" type="text" autocomplete="name" required><p class="qf-err" id="q-name-err">Please enter your name.</p></div>
+<div class="qf"><label for="q-phone">Phone</label><input id="q-phone" name="phone" type="tel" inputmode="tel" autocomplete="tel" required><p class="qf-err" id="q-phone-err">Please enter a 10-digit phone number.</p></div>
+<div class="qf qf-full"><label for="q-addr">Address or town</label><input id="q-addr" name="address" type="text" autocomplete="street-address" required><p class="qf-err" id="q-addr-err">Please enter an address or town so we can price it.</p></div>
+<div class="qf qf-full"><label for="q-svc">What needs cleaning?</label><select id="q-svc" name="service">$opts</select></div>
+<div class="qf qf-full"><label for="q-msg">Anything else? <span class="opt">(optional)</span></label><textarea id="q-msg" name="message" rows="3"></textarea></div>
+</div>
 <input type="checkbox" name="botcheck" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
-<button type="submit" class="btn btn-primary btn-block">Send my quote request</button>
+<div class="qf-foot"><button type="submit" class="btn btn-primary btn-lg">Get my free quote</button><p class="qf-fine">We reply within a day.</p></div>
 <p class="qf-status" role="status" aria-live="polite"></p>
-<p class="qf-fine">We only use your details to reply about your quote.</p>
 </form>
 <div class="qform-done" hidden tabindex="-1"><h3>Thanks, we&rsquo;ve got it.</h3><p>We&rsquo;ll reach out with your quote as soon as possible. Need us sooner? Call or text <a href="$Tel">$Phone</a>.</p></div>
+</div>
 </div></section>
 "@
 }
@@ -171,56 +194,60 @@ function Render-Aside([string]$spec) {
   $links = ($parts[-1].Split('~') | Where-Object { $_ } | ForEach-Object { $p = $_.Split('|'); "<li><a href=`"$($p[1].Trim())`">$($p[0].Trim())</a></li>" }) -join ''
   @"
 <aside class="aside" aria-label="Get a quote and related pages">
-<div class="aside-card"><h2>Free quote, usually same day</h2><p>Text a couple of photos and we&rsquo;ll send a price. No obligation.</p><a class="btn btn-primary" href="#quote">Get a free quote</a><a class="btn btn-ghost" href="$Tel">Call $Phone</a></div>
+<div class="aside-card"><h2>Free quote</h2><p>Send a few details or text a photo. We get back to you within a day.</p><a class="btn btn-primary" href="#quote">Get a free quote</a><a class="btn btn-outline" href="$Tel">Call $Phone</a></div>
 <nav class="aside-links" aria-label="$head"><h2>$head</h2><ul>$links</ul></nav>
 </aside>
 "@
 }
 
 # ---------------------------------------------------------------- chrome
-$SvcMenu = ($Services | ForEach-Object { "<li><a href=`"$($_.url)`">$(Enc $_.name)</a></li>" }) -join ''
-$Header = @"
+$IcoPhone = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>'
+$IcoMail = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>'
+$IcoIg = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>'
+
+$NavItems = @(@('home','Home','/'), @('about','About','/about.html'), @('services','Services','/services/'), @('projects','Projects','/our-work/'), @('contact','Contact','/contact.html'))
+function Render-Header([string]$current) {
+  $items = ($NavItems | ForEach-Object { $cur = if ($_[0] -eq $current) { ' aria-current="page"' } else { '' }; "<li><a href=`"$($_[2])`"$cur>$($_[1])</a></li>" }) -join ''
+  @"
 <a class="skip-link" href="#content">Skip to content</a>
+<div class="cbar"><div class="cbar-in"><a href="$Tel">$IcoPhone $Phone</a><a class="cbar-email" href="mailto:$Email">$IcoMail $Email</a><a class="cbar-social" href="https://www.instagram.com/procleansurfaces" rel="noopener" target="_blank">$IcoIg Instagram</a></div></div>
 <header class="site-header" id="top">
 <div class="container hdr">
-<a href="/" class="hdr-logo" aria-label="Pro Clean Surface Works home"><img src="/images/logo.webp" alt="Pro Clean Surface Works" width="141" height="30"></a>
+<a href="/" class="hdr-logo" aria-label="Pro Clean Surface Works home"><img src="/images/logo.webp" alt="Pro Clean Surface Works" width="170" height="36"></a>
 <nav class="hdr-nav" id="siteNav" aria-label="Main">
-<ul class="nav-list">
-<li class="has-sub"><button type="button" class="nav-sub-btn" aria-expanded="false" aria-controls="svcMenu">Services</button><ul class="nav-sub" id="svcMenu">$SvcMenu</ul></li>
-<li><a href="/our-work/">Our work</a></li>
-<li><a href="/service-areas.html">Service areas</a></li>
-<li><a href="/about.html">About</a></li>
-<li><a href="/reviews.html">Reviews</a></li>
+<ul class="nav-list">$items
+<li class="nav-m"><a href="/service-areas.html">Service areas</a></li>
+<li class="nav-m"><a href="/reviews.html">Reviews</a></li>
 <li class="nav-m"><a href="/resources.html">Guides</a></li>
-<li class="nav-m"><a href="/contact.html">Contact</a></li>
 <li class="nav-m nav-call"><a href="$Tel">Call or text $Phone</a></li>
 </ul>
 </nav>
 <div class="hdr-act">
-<a class="hdr-phone" href="$Tel"><span class="hdr-phone-l">Call or text</span> $Phone</a>
-<a class="btn btn-primary btn-sm" href="#quote">Free quote</a>
+<a class="btn btn-primary" href="#quote">Get free quote</a>
 <button type="button" class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="siteNav"><span class="sr-only">Menu</span><span class="bars" aria-hidden="true"></span></button>
 </div>
 </div>
 </header>
 "@
+}
 
 $AreaFoot = ($Areas.Values | ForEach-Object { $_ } | ForEach-Object { "<li><a href=`"$($_[1])`">$($_[0])</a></li>" }) -join ''
 $SvcFoot = ($Services | ForEach-Object { "<li><a href=`"$($_.url)`">$(Enc $_.name)</a></li>" }) -join ''
 $Footer = @"
 <footer class="site-footer">
 <div class="container ftr">
-<div class="ftr-brand"><a href="/" class="ftr-logo"><img src="/images/logo.webp" alt="Pro Clean Surface Works" width="150" height="32" loading="lazy"></a>
-<p>Pressure washing and exterior cleaning in Baton Rouge, Louisiana. Locally owned by Grayson Allain, Riley Allain and Reid Scott.</p>
-<p class="ftr-nap"><strong>Pro Clean Surface Works</strong><br>Baton Rouge, LA<br><a href="$Tel">$Phone</a><br><a href="mailto:$Email">$Email</a></p></div>
-<div><h2 class="ftr-h">Services</h2><ul>$SvcFoot</ul></div>
+<div class="ftr-brand"><a href="/" class="ftr-logo"><img src="/images/logo.webp" alt="Pro Clean Surface Works" width="200" height="42" loading="lazy"></a>
+<p>Professional exterior cleaning for Baton Rouge homes and businesses. Driveways, houses, sidewalks and garbage cans, done right.</p>
+<p class="ftr-nap"><strong>Pro Clean Surface Works</strong><br>Baton Rouge, LA<br><a href="$Tel">$Phone</a><br><a href="mailto:$Email">$Email</a><br><a href="https://www.instagram.com/procleansurfaces" rel="noopener" target="_blank">Instagram</a></p>
+<p style="margin-top:20px"><a class="btn btn-primary" href="#quote">Get free quote</a></p></div>
+<div><h2 class="ftr-h">Services</h2><ul><li><a href="/services/">All services</a></li>$SvcFoot</ul></div>
 <div><h2 class="ftr-h">Service areas</h2><ul>$AreaFoot<li><a href="/service-areas.html">All service areas</a></li></ul></div>
-<div><h2 class="ftr-h">Company</h2><ul><li><a href="/about.html">About us</a></li><li><a href="/our-work/">Our work</a></li><li><a href="/reviews.html">Reviews</a></li><li><a href="/resources.html">Guides</a></li><li><a href="/contact.html">Contact</a></li><li><a href="https://www.instagram.com/procleansurfaces" rel="noopener" target="_blank">Instagram</a></li></ul>
+<div><h2 class="ftr-h">Company</h2><ul><li><a href="/about.html">About</a></li><li><a href="/our-work/">Projects</a></li><li><a href="/reviews.html">Reviews</a></li><li><a href="/resources.html">Guides</a></li><li><a href="/contact.html">Contact</a></li></ul>
 <h2 class="ftr-h ftr-h2">Who we help</h2><ul><li><a href="/pressure-washing-for-realtors-baton-rouge/">Realtors &amp; home sellers</a></li><li><a href="/pressure-washing-for-property-managers-baton-rouge/">Property managers</a></li><li><a href="/pressure-washing-for-hoas-baton-rouge/">HOAs &amp; neighborhoods</a></li><li><a href="/pressure-washing-for-restaurants-baton-rouge/">Restaurants</a></li></ul></div>
 </div>
-<div class="container ftr-base"><p>&copy; 2026 Pro Clean Surface Works. Pressure washing in Baton Rouge, Louisiana.</p><p><a href="/privacy.html">Privacy</a> <a href="/terms.html">Terms</a></p></div>
+<div class="ftr-base"><div><span>&copy; 2026 Pro Clean Surface Works. Serving the Baton Rouge area.</span><span><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></span></div></div>
 </footer>
-<div class="m-bar" id="mBar"><a href="$Tel" class="m-call">Call $Phone</a><a href="#quote" class="m-quote">Free quote</a></div>
+<div class="m-bar" id="mBar"><a href="$Tel" class="m-call">Call now</a><a href="#quote" class="m-quote">Free quote</a></div>
 <script src="/js/site.js?v=$CssV" defer></script>
 "@
 
@@ -241,7 +268,7 @@ foreach ($file in Get-ChildItem $Pages -Filter *.html | Sort-Object Name) {
   # body placeholders
   if ($meta.faqs) { $body = $body.Replace('<!--faq-->', (Render-Faq $meta.faqs $meta.faqTitle)) }
   $body = [regex]::Replace($body, '<!--aside:([^>]*)-->', { param($x) Render-Aside $x.Groups[1].Value })
-  $body = $body.Replace('<!--reviews-->', (Render-Reviews)).Replace('<!--areas-->', (Render-Areas)).Replace('<!--services-->', (Render-ServiceList))
+  $body = $body.Replace('<!--chips-->', (Render-Chips)).Replace('<!--reviews-->', (Render-Reviews)).Replace('<!--areas-->', (Render-Areas)).Replace('<!--services-->', (Render-ServiceList))
   $body = [regex]::Replace($body, '<!--quote(?:\|([^|]*)\|([^>]*))?-->', { param($x) Render-Quote $x.Groups[1].Value $x.Groups[2].Value })
   $body = [regex]::Replace($body, '<!--work:([a-z,-]+)(?:\|([^>]*))?-->', { param($x) Render-Work $x.Groups[1].Value $x.Groups[2].Value })
   $body = [regex]::Replace($body, '<!--pair:([a-z-]+)(?::(lg|sm|hero))?-->', { param($x) $s = if ($x.Groups[2].Value) { $x.Groups[2].Value } else { 'lg' }; Render-Pair $x.Groups[1].Value $s })
@@ -297,6 +324,7 @@ foreach ($file in Get-ChildItem $Pages -Filter *.html | Sort-Object Name) {
   $ogImg = if ($meta.ogImage) { $meta.ogImage } else { '/images/og-share.jpg' }
   $preload = ''
   if ($meta.preload) { $preload = "<link rel=`"preload`" as=`"image`" href=`"$($meta.preload.href)`" imagesrcset=`"$($meta.preload.srcset)`" imagesizes=`"$($meta.preload.sizes)`" fetchpriority=`"high`">" }
+  $navKey = if ($meta.nav) { $meta.nav } elseif ($meta.url -eq '/') { 'home' } elseif ($meta.type -eq 'service') { 'services' } elseif ($meta.url -eq '/our-work/') { 'projects' } elseif ($meta.url -eq '/about.html') { 'about' } elseif ($meta.url -eq '/contact.html') { 'contact' } else { '' }
   $bodyClass = if ($meta.type) { "page-$($meta.type)" } else { 'page' }
 
   $html = @"
@@ -309,7 +337,7 @@ foreach ($file in Get-ChildItem $Pages -Filter *.html | Sort-Object Name) {
 <meta name="description" content="$(Enc $meta.description)">
 <link rel="canonical" href="$url">
 <meta name="robots" content="$robots">
-<meta name="theme-color" content="#0E1E2A">
+<meta name="theme-color" content="#303030">
 <meta name="geo.region" content="US-LA">
 <meta name="geo.placename" content="Baton Rouge, Louisiana">
 <meta property="og:type" content="$(if($meta.article){'article'}else{'website'})">
@@ -325,7 +353,8 @@ foreach ($file in Get-ChildItem $Pages -Filter *.html | Sort-Object Name) {
 <meta name="twitter:title" content="$(Enc $meta.title)">
 <meta name="twitter:description" content="$(Enc $meta.description)">
 <meta name="twitter:image" content="$Site$ogImg">
-<link rel="preload" as="font" type="font/woff2" href="/fonts/inter-var.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/barlow-400.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/barlow-sc-800i.woff2" crossorigin>
 $preload
 <link rel="icon" href="/images/logo.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/images/logo.png">
@@ -333,7 +362,7 @@ $preload
 <script type="application/ld+json">$ldJson</script>
 </head>
 <body class="$bodyClass">
-$Header
+$(Render-Header $navKey)
 <main id="content">
 $($body.Trim())
 </main>
