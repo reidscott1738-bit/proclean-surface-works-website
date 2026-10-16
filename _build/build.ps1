@@ -61,7 +61,6 @@ $Business = [ordered]@{
   slogan = 'Pressure washing done right.'
   telephone = '+1-225-363-5220'
   email = $Email
-  priceRange = '$$'
   address = [ordered]@{ '@type'='PostalAddress'; addressLocality='Baton Rouge'; addressRegion='LA'; postalCode='70808'; addressCountry='US' }
   areaServed = @(
     @{ '@type'='City'; name='Baton Rouge' }, @{ '@type'='City'; name='Prairieville' }, @{ '@type'='City'; name='Gonzales' },

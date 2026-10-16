@@ -63,6 +63,10 @@
   RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 </IfModule>
 
+# Pricing guide retired (no prices shown on the site)
+Redirect 301 /pressure-washing-cost-baton-rouge/ https://procleansurfaces.com/services/
+Redirect 301 /pressure-washing-cost-baton-rouge https://procleansurfaces.com/services/
+
 # Real 404 page (returns a 404 status; never point this at the homepage).
 ErrorDocument 404 /404.html
 
